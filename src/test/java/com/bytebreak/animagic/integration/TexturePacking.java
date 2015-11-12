@@ -9,6 +9,10 @@ public class TexturePacking {
         TexturePacker.Settings settings = new TexturePacker.Settings();
         settings.maxWidth *= 4;
         settings.maxHeight *= 4;
+        settings.combineSubdirectories = true;
+        settings.duplicatePadding = true;
+        settings.fast = true;
+        settings.square = true;
         settings.filterMin = Texture.TextureFilter.Nearest;
         settings.filterMag = Texture.TextureFilter.Nearest;
         //
