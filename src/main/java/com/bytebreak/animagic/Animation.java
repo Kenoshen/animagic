@@ -18,7 +18,7 @@ public class Animation implements IFrameByFrameAnimation {
     private boolean finishedPlaying = false;
     private float percentagePerFrame;
 
-    public Animation(@NotNull String name, AnimationPlayState playState, float totalDurationSeconds, @NotNull TextureRegion[] textureArray, @NotNull int[] keyframes){
+    public Animation(@NotNull String name, AnimationPlayState playState, float frameDuration, @NotNull TextureRegion[] textureArray, @NotNull int[] keyframes){
         if (name == null) throw new AnimagicException("Animation.name cannot be null");
         if (name.trim().equalsIgnoreCase("")) throw new AnimagicException("Animation.name cannot be ''");
         if (textureArray == null) throw new AnimagicException("Animation.textures cannot be null");
@@ -27,7 +27,7 @@ public class Animation implements IFrameByFrameAnimation {
 
         this.name = name;
         this.playState = playState;
-        this.totalDuration = totalDurationSeconds;
+        this.totalDuration = frameDuration * textureArray.length;
         this.textures = textureArray;
         this.keyframes = keyframes;
 
