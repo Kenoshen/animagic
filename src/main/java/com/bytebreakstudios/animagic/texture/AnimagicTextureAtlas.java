@@ -36,7 +36,7 @@ public class AnimagicTextureAtlas {
     }
 
 
-    private final TextureAtlas atlas;
+    public final TextureAtlas atlas;
     private AnimagicAtlasData meta;
 
     public AnimagicTextureAtlas(String internalPackFile) {
