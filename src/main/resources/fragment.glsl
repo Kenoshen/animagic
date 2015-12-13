@@ -2,9 +2,20 @@
 precision mediump float;
 #endif
 varying vec4 v_color;
+varying vec4 v_position;
 varying vec2 v_texCoords;
 uniform sampler2D u_texture;
 uniform sampler2D u_normals;
+uniform bool isLight0;
+uniform bool isLight1;
+uniform bool isLight2;
+uniform bool isLight3;
+uniform bool isLight4;
+uniform bool isLight5;
+uniform bool isLight6;
+uniform bool isLight7;
+uniform bool isLight8;
+uniform bool isLight9;
 uniform vec3 light0;
 uniform vec3 light1;
 uniform vec3 light2;
@@ -37,7 +48,6 @@ uniform float attenuation8;
 uniform float attenuation9;
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
-uniform vec2 resolution;
 uniform bool useNormals;
 uniform bool useShadow;
 uniform float strength;
@@ -52,19 +62,22 @@ uniform float xNorCoordDiff;
 uniform float yNorCoordMin;
 uniform float yNorCoordDiff;
 
-vec3 calculateLight(vec2 texCoord,
+vec3 calculateLight(
+                    bool isLight,
                     vec3 light,
-                    vec3 normal,
-                    vec2 resolution,
-                    float attenuation,
-                    bool useShadow,
                     vec3 lightColor,
+                    float attenuation,
+                    vec2 position,
+                    vec4 textureColor,
+                    vec3 normal,
                     vec4 vertexColor,
-                    vec4 textureColor);
+                    bool useShadow
+                    );
 
 void main() {
-    vec2 norCoords = vec2(xNorCoordMin + (((v_texCoords.x - xCoordMin) / xCoordDiff) * xNorCoordDiff),
-                          yNorCoordMin + (((v_texCoords.y - yCoordMin) / yCoordDiff) * yNorCoordDiff));
+    vec2 texCoords = v_texCoords.xy;
+    vec2 norCoords = vec2(xNorCoordMin + (((texCoords.x - xCoordMin) / xCoordDiff) * xNorCoordDiff),
+                          yNorCoordMin + (((texCoords.y - yCoordMin) / yCoordDiff) * yNorCoordDiff));
     vec4 color = texture2D(u_texture, v_texCoords);
     vec3 nColor = texture2D(u_normals, norCoords).rgb;
     //some bump map programs will need the Y value flipped..
@@ -78,41 +91,61 @@ void main() {
     if (useNormals){
         vec3 additiveBlending =
             ambient +
-            calculateLight(v_texCoords.xy, light0, normal, resolution, attenuation0, useShadow, lightColor0, v_color, color) +
-            calculateLight(v_texCoords.xy, light1, normal, resolution, attenuation1, useShadow, lightColor1, v_color, color) +
-            calculateLight(v_texCoords.xy, light2, normal, resolution, attenuation2, useShadow, lightColor2, v_color, color) +
-            calculateLight(v_texCoords.xy, light3, normal, resolution, attenuation3, useShadow, lightColor3, v_color, color) +
-            calculateLight(v_texCoords.xy, light4, normal, resolution, attenuation4, useShadow, lightColor4, v_color, color) +
-            calculateLight(v_texCoords.xy, light5, normal, resolution, attenuation5, useShadow, lightColor5, v_color, color) +
-            calculateLight(v_texCoords.xy, light6, normal, resolution, attenuation6, useShadow, lightColor6, v_color, color) +
-            calculateLight(v_texCoords.xy, light7, normal, resolution, attenuation7, useShadow, lightColor7, v_color, color) +
-            calculateLight(v_texCoords.xy, light8, normal, resolution, attenuation8, useShadow, lightColor8, v_color, color) +
-            calculateLight(v_texCoords.xy, light9, normal, resolution, attenuation9, useShadow, lightColor9, v_color, color);
+            calculateLight(isLight0, light0, lightColor0, attenuation0, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight1, light1, lightColor1, attenuation1, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight2, light2, lightColor2, attenuation2, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight3, light3, lightColor3, attenuation3, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight4, light4, lightColor4, attenuation4, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight5, light5, lightColor5, attenuation5, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight6, light6, lightColor6, attenuation6, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight7, light7, lightColor7, attenuation7, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight8, light8, lightColor8, attenuation8, v_position.xy, color, normal, v_color, useShadow) +
+            calculateLight(isLight9, light9, lightColor9, attenuation9, v_position.xy, color, normal, v_color, useShadow);
         gl_FragColor = vec4(additiveBlending, color.a);
     } else {
         gl_FragColor = color;
     }
+
+//    vec3 deltaPos = vec3( light0.xy - v_position.xy, light0.z );
+//
+//    vec3 lightDir = normalize(deltaPos);
+//    float lambert = useNormals ? clamp(dot(normal, lightDir), 0.0, 1.0) : 1.0;
+//
+//    float d = sqrt(dot(deltaPos, deltaPos));
+//    float att = useShadow ? 1.0 / ( attenuation0 + (attenuation0*d) + (attenuation0*d*d) ) : 1.0;
+//
+//    vec3 result = (lightColor0.rgb * lambert) * att;
+//    result *= color.rgb;
+//    result *= v_color.rgb;
+//
+//    gl_FragColor = vec4(result + ambient, color.a);
 }
 
-vec3 calculateLight(vec2 texCoord,
+vec3 calculateLight(
+                    bool isLight,
                     vec3 light,
-                    vec3 normal,
-                    vec2 resolution,
-                    float attenuation,
-                    bool useShadow,
                     vec3 lightColor,
+                    float attenuation,
+                    vec2 position,
+                    vec4 textureColor,
+                    vec3 normal,
                     vec4 vertexColor,
-                    vec4 textureColor) {
-    vec3 deltaPos = vec3( (light.xy - texCoord) / resolution.xy, light.z );
+                    bool useShadow
+                    ) {
+    if (isLight){
+        vec3 deltaPos = vec3( (light.xy - position), light.z );
 
-    vec3 lightDir = normalize(deltaPos);
-    float lambert = useNormals ? clamp(dot(normal, lightDir), 0.0, 1.0) : 1.0;
+        vec3 lightDir = normalize(deltaPos);
+        float lambert = useNormals ? clamp(dot(normal, lightDir), 0.0, 1.0) : 1.0;
 
-    float d = sqrt(dot(deltaPos, deltaPos));
-    float att = useShadow ? 1.0 / ( attenuation + (attenuation*d) + (attenuation*d*d) ) : 1.0;
+        float d = sqrt(dot(deltaPos, deltaPos));
+        float att = useShadow ? 1.0 / ( attenuation + (attenuation*d) + (attenuation*d*d) ) : 1.0;
 
-    vec3 result = (lightColor.rgb * lambert) * att;
-    result *= textureColor.rgb;
-    result *= vertexColor.rgb;
-    return result;
+        vec3 result = (lightColor.rgb * lambert) * att;
+        result *= textureColor.rgb;
+        result *= vertexColor.rgb;
+        return result;
+    } else {
+        return vec3(0, 0, 0);
+    }
 }

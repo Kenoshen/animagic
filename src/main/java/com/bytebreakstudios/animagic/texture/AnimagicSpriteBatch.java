@@ -61,7 +61,6 @@ public class AnimagicSpriteBatch extends SpriteBatch {
         program.setUniformf("strength", 1f);
         program.setUniformf("ambientIntensity", 0f);
         program.setUniformf("ambientColor", new Vector3(0, 0, 0));
-        program.setUniformf("resolution", new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         program.setUniformi("useShadow", 1); // true
         program.setUniformi("useNormals", 1); // true
         program.setUniformi("yInvert", 0); // false
@@ -200,31 +199,40 @@ public class AnimagicSpriteBatch extends SpriteBatch {
 
         public Light position(float x, float y, float z) {
             if (this.x != x || this.y != y || this.z != z) {
-                dirty = true;
                 Vector3 p = new Vector3(x, y, z);
                 Vector3 pScreen = camera.project(p);
+                // TODO: Why does this work, you ask?
+                pScreen.x -= Gdx.graphics.getWidth() / 2;
+                pScreen.x /= Gdx.graphics.getWidth() / 2;
+                pScreen.y -= Gdx.graphics.getHeight() / 2;
+                pScreen.y /= Gdx.graphics.getHeight() / 2;
+                // TODO: I have no idea...
                 pScreen.z = z;
                 getShader().setUniformf("light" + index, pScreen);
+
+                isDirty(true);
             }
             return this;
         }
 
         public Light attenuation(float attenuation) {
             if (this.attenuation != attenuation) {
-                dirty = true;
                 this.attenuation = attenuation;
                 getShader().setUniformf("attenuation" + index, this.attenuation);
+
+                isDirty(true);
             }
             return this;
         }
 
         public Light color(float r, float g, float b) {
             if (this.r != r || this.g != g || this.b != b) {
-                dirty = true;
                 this.r = r;
                 this.g = g;
                 this.b = b;
                 getShader().setUniformf("lightColor" + index, new Vector3(this.r, this.g, this.b));
+
+                isDirty(true);
             }
             return this;
         }
@@ -237,8 +245,13 @@ public class AnimagicSpriteBatch extends SpriteBatch {
             return dirty;
         }
 
+        private void isDirty(boolean isDirty){
+            dirty = isDirty;
+            getShader().setUniformi("isLight" + index, isDirty ? 1 : 0);
+        }
+
         public Light resetDirty() {
-            this.dirty = false;
+            isDirty(false);
             return this;
         }
 

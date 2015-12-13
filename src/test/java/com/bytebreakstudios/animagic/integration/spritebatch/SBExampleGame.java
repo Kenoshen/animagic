@@ -33,6 +33,7 @@ public class SBExampleGame extends Game {
 
         camera.update();
         Vector3 mousePos = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        //Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
 
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -40,10 +41,11 @@ public class SBExampleGame extends Game {
 
         spriteBatch.begin();
 
-        spriteBatch.setAmbientColor(Color.WHITE);
-        spriteBatch.setAmbientIntensity(0.01f);
-        spriteBatch.setNextLight(mousePos.x, mousePos.y, 0.1f, 0.9f, Color.RED);
+        spriteBatch.setAmbientColor(Color.PURPLE);
+        spriteBatch.setAmbientIntensity(0.05f);
+        spriteBatch.setNextLight(mousePos.x, mousePos.y, 0.1f, 0.3f, Color.RED);
         spriteBatch.setNextLight(-mousePos.x, -mousePos.y, 0.5f, 1, Color.GREEN);
+        spriteBatch.setNextLight(-10, -10, 0.5f, 1, Color.BLUE);
 
 
         spriteBatch.draw(texture1, 0, 0, 400, 400);
