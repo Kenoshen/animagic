@@ -49,6 +49,7 @@ uniform float attenuation9;
 uniform float ambientIntensity;
 uniform vec3 ambientColor;
 uniform bool useNormals;
+uniform bool drawNormals;
 uniform bool useShadow;
 uniform float strength;
 uniform bool yInvert;
@@ -105,20 +106,9 @@ void main() {
     } else {
         gl_FragColor = color;
     }
-
-//    vec3 deltaPos = vec3( light0.xy - v_position.xy, light0.z );
-//
-//    vec3 lightDir = normalize(deltaPos);
-//    float lambert = useNormals ? clamp(dot(normal, lightDir), 0.0, 1.0) : 1.0;
-//
-//    float d = sqrt(dot(deltaPos, deltaPos));
-//    float att = useShadow ? 1.0 / ( attenuation0 + (attenuation0*d) + (attenuation0*d*d) ) : 1.0;
-//
-//    vec3 result = (lightColor0.rgb * lambert) * att;
-//    result *= color.rgb;
-//    result *= v_color.rgb;
-//
-//    gl_FragColor = vec4(result + ambient, color.a);
+    if (drawNormals){
+        gl_FragColor = vec4(normal, color.a);
+    }
 }
 
 vec3 calculateLight(
