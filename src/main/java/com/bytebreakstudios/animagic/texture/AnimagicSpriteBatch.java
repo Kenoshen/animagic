@@ -72,16 +72,42 @@ public class AnimagicSpriteBatch extends SpriteBatch {
     public AnimagicSpriteBatch isShaderOn(boolean isShaderOn) {
         getShader().begin();
         if (isShaderOn) {
-            getShader().setUniformi("useShadow", 1);
             getShader().setUniformi("useNormals", 1);
         } else {
-            getShader().setUniformi("useShadow", 0);
             getShader().setUniformi("useNormals", 0);
         }
         getShader().end();
         return this;
     }
 
+    public AnimagicSpriteBatch debugNormals(boolean debugNormals) {
+        getShader().begin();
+        if (debugNormals) {
+            getShader().setUniformi("drawNormals", 1);
+        } else {
+            getShader().setUniformi("drawNormals", 0);
+        }
+        getShader().end();
+        return this;
+    }
+
+    public AnimagicSpriteBatch useShadow(boolean useShadow) {
+        getShader().begin();
+        if (useShadow) {
+            getShader().setUniformi("useShadow", 1);
+        } else {
+            getShader().setUniformi("useShadow", 0);
+        }
+        getShader().end();
+        return this;
+    }
+
+    public AnimagicSpriteBatch normalIntensity(float normalIntensity) {
+        getShader().begin();
+        getShader().setUniformf("strength", Math.min(Math.max(normalIntensity, 0), 1));
+        getShader().end();
+        return this;
+    }
 
     public AnimagicSpriteBatch setAmbientColor(Color ambientColor){
         if (ambientColor == null) throw new RuntimeException("Ambient color cannot be null");

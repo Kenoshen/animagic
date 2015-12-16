@@ -89,7 +89,9 @@ void main() {
     //normals need to be converted to [-1.0, 1.0] range and normalized
     vec3 normal = normalize(nColor * 2.0 - 1.0);
     vec3 ambient = vec3(ambientColor * ambientIntensity);
-    if (useNormals){
+    if (drawNormals){
+        gl_FragColor = vec4(normal, color.a);
+    } else if (useNormals){
         vec3 additiveBlending =
             ambient +
             calculateLight(isLight0, light0, lightColor0, attenuation0, v_position.xy, color, normal, v_color, useShadow) +
@@ -105,9 +107,6 @@ void main() {
         gl_FragColor = vec4(additiveBlending, color.a);
     } else {
         gl_FragColor = color;
-    }
-    if (drawNormals){
-        gl_FragColor = vec4(normal, color.a);
     }
 }
 
