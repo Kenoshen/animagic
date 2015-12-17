@@ -127,14 +127,17 @@ public class Character implements AnimationListener {
     }
 
     @Override
-    public void animationNotification(Animation self, Animation.AnimationListenerState listenerState) {
-        if (listenerState == Animation.AnimationListenerState.KEYFRAME) {
-            lastAttack = self.name();
-            currentState = State.COMBOAVAILABLE;
-        }
-        if (listenerState == Animation.AnimationListenerState.FINISHED) {
-            animator.switchToAnimation("stand");
-            currentState = State.NEUTRAL;
+    public void animationNotification(IFrameByFrameAnimation self, Animation.AnimationListenerState listenerState) {
+        if (self instanceof Animation) {
+            Animation anim = (Animation) self;
+            if (listenerState == Animation.AnimationListenerState.KEYFRAME) {
+                lastAttack = anim.name();
+                currentState = State.COMBOAVAILABLE;
+            }
+            if (listenerState == Animation.AnimationListenerState.FINISHED) {
+                animator.switchToAnimation("stand");
+                currentState = State.NEUTRAL;
+            }
         }
     }
 

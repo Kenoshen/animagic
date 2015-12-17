@@ -78,6 +78,7 @@ public class SBExampleGame extends Game {
 
         spriteBatch.draw(texture1, 0, 0, 400, 400);
         spriteBatch.draw(texture0, 0, 0, 400, 400);
+
         spriteBatch.end();
     }
 }

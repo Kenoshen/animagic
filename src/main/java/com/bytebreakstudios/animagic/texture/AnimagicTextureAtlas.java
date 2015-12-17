@@ -2,8 +2,6 @@ package com.bytebreakstudios.animagic.texture;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
@@ -21,18 +19,11 @@ import java.util.regex.Pattern;
 public class AnimagicTextureAtlas {
     private static final Pattern LAST_INT_PATTERN = Pattern.compile("[^0-9]+(_?[0-9]+)$");
 
-    public static final Texture flatNormalMap;
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enableDefaultTyping();
-
-        Pixmap p = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
-        p.setColor(.5f, .5f, 1, 1);
-        p.fill();
-        flatNormalMap = new Texture(p);
-        p.dispose();
     }
 
 
@@ -138,7 +129,8 @@ public class AnimagicTextureAtlas {
                         region = getRegion(name + "-normal", frameIndex);
                         if (region == null) {
                             region = getRegion(name + "-normals", frameIndex);
-                            if (region == null) return new TextureRegion(flatNormalMap, 0, 0, 1, 1);
+                            if (region == null)
+                                return new TextureRegion(AnimagicTextureRegion.FLAT_NORMAL_MAP, 0, 0, 1, 1);
                         }
                     }
                 }

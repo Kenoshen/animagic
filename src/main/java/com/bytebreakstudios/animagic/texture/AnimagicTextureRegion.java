@@ -1,5 +1,7 @@
 package com.bytebreakstudios.animagic.texture;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -7,6 +9,16 @@ import com.bytebreakstudios.animagic.texture.data.AnimagicTextureData;
 import com.bytebreakstudios.animagic.utils.AnimagicException;
 
 public class AnimagicTextureRegion extends TextureRegion {
+    public static final Texture FLAT_NORMAL_MAP;
+
+    static {
+        Pixmap p = new Pixmap(2, 2, Pixmap.Format.RGBA8888);
+        p.setColor(new Color(0.5f, 0.5f, 1.0f, 1.0f));
+        p.fill();
+        FLAT_NORMAL_MAP = new Texture(p);
+        p.dispose();
+    }
+
     private final AnimagicTextureData meta;
     private final TextureRegion normals;
     public final AnimagicTextureRegionShaderData shaderData;

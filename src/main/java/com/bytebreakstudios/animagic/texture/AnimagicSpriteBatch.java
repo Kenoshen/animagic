@@ -4,9 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -17,6 +19,11 @@ public class AnimagicSpriteBatch extends SpriteBatch {
     private final Light[] lights;
 
     private Camera camera;
+
+    private boolean isShaderOn = true;
+    private boolean useShadow = true;
+    private boolean debugNormals = false;
+    private float normalIntensity = 1;
 
     public AnimagicSpriteBatch(Camera camera) {
         super();
@@ -70,6 +77,7 @@ public class AnimagicSpriteBatch extends SpriteBatch {
     }
 
     public AnimagicSpriteBatch isShaderOn(boolean isShaderOn) {
+        this.isShaderOn = isShaderOn;
         getShader().begin();
         if (isShaderOn) {
             getShader().setUniformi("useNormals", 1);
@@ -80,7 +88,14 @@ public class AnimagicSpriteBatch extends SpriteBatch {
         return this;
     }
 
+
+    public boolean isShaderOn() {
+        return isShaderOn;
+    }
+
+
     public AnimagicSpriteBatch debugNormals(boolean debugNormals) {
+        this.debugNormals = debugNormals;
         getShader().begin();
         if (debugNormals) {
             getShader().setUniformi("drawNormals", 1);
@@ -91,7 +106,12 @@ public class AnimagicSpriteBatch extends SpriteBatch {
         return this;
     }
 
+    public boolean debugNormals() {
+        return debugNormals;
+    }
+
     public AnimagicSpriteBatch useShadow(boolean useShadow) {
+        this.useShadow = useShadow;
         getShader().begin();
         if (useShadow) {
             getShader().setUniformi("useShadow", 1);
@@ -102,11 +122,20 @@ public class AnimagicSpriteBatch extends SpriteBatch {
         return this;
     }
 
+    public boolean useShadow() {
+        return useShadow;
+    }
+
     public AnimagicSpriteBatch normalIntensity(float normalIntensity) {
+        this.normalIntensity = Math.min(Math.max(normalIntensity, 0), 1);
         getShader().begin();
-        getShader().setUniformf("strength", Math.min(Math.max(normalIntensity, 0), 1));
+        getShader().setUniformf("strength", this.normalIntensity);
         getShader().end();
         return this;
+    }
+
+    public float normalIntensity() {
+        return normalIntensity;
     }
 
     public AnimagicSpriteBatch setAmbientColor(Color ambientColor){
@@ -165,7 +194,7 @@ public class AnimagicSpriteBatch extends SpriteBatch {
             if (aRegion.getNormalTextureRegion() != null) {
                 aRegion.getNormalTextureRegion().getTexture().bind(1);
             } else {
-                AnimagicTextureAtlas.flatNormalMap.bind(1);
+                AnimagicTextureRegion.FLAT_NORMAL_MAP.bind(1);
             }
             region.getTexture().bind(0);
             ShaderProgram p = getShader();
@@ -182,34 +211,86 @@ public class AnimagicSpriteBatch extends SpriteBatch {
         return pos;
     }
 
+    private void preDraw(Texture texture) {
+        AnimagicTextureRegion.FLAT_NORMAL_MAP.bind(1);
+        texture.bind(0);
+    }
 
+    @Override
     public void draw(TextureRegion region, float x, float y) {
         Vector2 pos = preDraw(region, x, y, region.getRegionWidth(), region.getRegionHeight());
         super.draw(region, pos.x, pos.y);
         flush();
     }
 
-
+    @Override
     public void draw(TextureRegion region, float x, float y, float width, float height) {
         Vector2 pos = preDraw(region, x, y, width, height);
         super.draw(region, pos.x, pos.y, width, height);
         flush();
     }
 
-
+    @Override
     public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation) {
         Vector2 pos = preDraw(region, x, y, width, height);
         super.draw(region, pos.x, pos.y, originX, originY, width, height, scaleX, scaleY, rotation);
         flush();
     }
 
-
+    @Override
     public void draw(TextureRegion region, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, boolean clockwise) {
         Vector2 pos = preDraw(region, x, y, width, height);
         super.draw(region, pos.x, pos.y, originX, originY, width, height, scaleX, scaleY, rotation, clockwise);
         flush();
     }
 
+    @Override
+    public void draw(TextureRegion region, float width, float height, Affine2 transform) {
+        preDraw(region.getTexture());
+        super.draw(region, width, height, transform);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y, float originX, float originY, float width, float height, float scaleX, float scaleY, float rotation, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) {
+        preDraw(texture);
+        super.draw(texture, x, y, originX, originY, width, height, scaleX, scaleY, rotation, srcX, srcY, srcWidth, srcHeight, flipX, flipY);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y, float width, float height, int srcX, int srcY, int srcWidth, int srcHeight, boolean flipX, boolean flipY) {
+        preDraw(texture);
+        super.draw(texture, x, y, width, height, srcX, srcY, srcWidth, srcHeight, flipX, flipY);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y, int srcX, int srcY, int srcWidth, int srcHeight) {
+        preDraw(texture);
+        super.draw(texture, x, y, srcX, srcY, srcWidth, srcHeight);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y, float width, float height, float u, float v, float u2, float v2) {
+        preDraw(texture);
+        super.draw(texture, x, y, width, height, u, v, u2, v2);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y) {
+        preDraw(texture);
+        super.draw(texture, x, y);
+    }
+
+    @Override
+    public void draw(Texture texture, float x, float y, float width, float height) {
+        preDraw(texture);
+        super.draw(texture, x, y, width, height);
+    }
+
+    @Override
+    public void draw(Texture texture, float[] spriteVertices, int offset, int count) {
+        preDraw(texture);
+        super.draw(texture, spriteVertices, offset, count);
+    }
 
     public class Light {
         private float x = 0;
